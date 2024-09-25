@@ -498,15 +498,39 @@ list (APPEND BULLET_LIBRARIES BulletCollision)
 list (APPEND BULLET_LIBRARIES BulletDynamics)
 list (APPEND BULLET_LIBRARIES BulletSoftBody)
 set (BULLET_USE_FILE ${BULLET_CONFIG_CMAKE_PATH}/UseBullet.cmake)
-configure_file 	( ${CMAKE_CURRENT_SOURCE_DIR}/BulletConfig.cmake.in
-					${CMAKE_CURRENT_BINARY_DIR}/BulletConfig.cmake
-					@ONLY ESCAPE_QUOTES
-				)
+
+# Write the config file and the version file
+include(CMakePackageConfigHelpers)
+
+configure_package_config_file(
+	${CMAKE_CURRENT_SOURCE_DIR}/BulletConfig.cmake.in
+	${CMAKE_CURRENT_BINARY_DIR}/BulletConfig.cmake
+	INSTALL_DESTINATION ${BULLET_CONFIG_CMAKE_PATH}
+)
+
+write_basic_package_version_file(
+	${CMAKE_CURRENT_BINARY_DIR}/BulletConfigVersion.cmake
+	VERSION ${BULLET_VERSION}
+	COMPATIBILITY ExactVersion
+)
+
+# Install all exported targets
+install(
+	EXPORT BulletTargets
+	DESTINATION ${BULLET_CONFIG_CMAKE_PATH}
+	NAMESPACE Bullet::
+	FILE BulletTargets.cmake
+)
+
+
 OPTION(INSTALL_CMAKE_FILES "Install generated CMake files" ON)
 
 IF (INSTALL_CMAKE_FILES)
-	install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/UseBullet.cmake
-		${CMAKE_CURRENT_BINARY_DIR}/BulletConfig.cmake
+	install(
+		FILES
+			${CMAKE_CURRENT_SOURCE_DIR}/UseBullet.cmake
+			${CMAKE_CURRENT_BINARY_DIR}/BulletConfig.cmake
+			${CMAKE_CURRENT_BINARY_DIR}/BulletConfigVersion.cmake
 		DESTINATION ${BULLET_CONFIG_CMAKE_PATH}
 	)
 ENDIF (INSTALL_CMAKE_FILES)
